@@ -1,0 +1,3 @@
+customerNo,ProductId,Quantity,ExternalOrderId,orderDate,TriggerBusinessLogic
+12345,999999,22,LPDKT20,10-12-2025,false
+12345,999999,1,LPDKT20,10-12-2025,true

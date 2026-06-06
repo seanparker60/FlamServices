@@ -1,0 +1,2 @@
+customerNo,orderRef,ExternalOrderId,orderDate,Source,LineCount,OperatingCompany
+12345,Ord:456,LPDKT20,10-12-2025,Trade,2,Noordhoff

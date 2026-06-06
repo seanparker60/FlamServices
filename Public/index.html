@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Factory Order Creator</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .form-group { margin-bottom: 15px; }
+        select, input { width: 100%; padding: 8px; margin-top: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>📦 Create New Order</h1>
+    <div id="app">
+        <div class="form-group">
+            <label>Select Account:</label>
+            <select id="accountSelect"></select>
+        </div>
+        <div class="form-group">
+            <label>Select Product:</label>
+            <select id="productSelect"></select>
+        </div>
+        <div class="form-group">
+            <label>Quantity:</label>
+            <input type="number" id="qty" value="1">
+        </div>
+        <button onclick="submitOrder()">Submit Order to Salesforce</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        // Load data on startup
+/*
+        async function loadData() {
+            const res = await fetch('/setup-data');
+            const data = await res.json();
+            
+            const accSelect = document.getElementById('accountSelect');
+            data.accounts.forEach(a => {
+                accSelect.innerHTML += `<option value="${a.id}" data-sf="${a.sf_id}">${a.name}</option>`;
+            });
+
+            const prodSelect = document.getElementById('productSelect');
+            data.products.forEach(p => {
+                prodSelect.innerHTML += `<option value="${p.id}">${p.name} ($${p.price})</option>`;
+            });
+        }
+*/
+
+async function loadData() {
+    try {
+        const res = await fetch('/setup-data');
+        const data = await res.json();
+        
+        // CHECK: If the server sent an error instead of data, 'accounts' will be undefined
+        if (!data.accounts || !data.products) {
+            console.error("Server returned an error:", data);
+            document.getElementById('status').innerText = "❌ Error: Could not load data from Gateway.";
+            return;
+        }
+
+        const accSelect = document.getElementById('accountSelect');
+        data.accounts.forEach(a => {
+            accSelect.innerHTML += `<option value="${a.id}" data-sf="${a.sf_id}">${a.name}</option>`;
+        });
+
+        const prodSelect = document.getElementById('productSelect');
+        data.products.forEach(p => {
+            prodSelect.innerHTML += `<option value="${p.id}">${p.name} ($${p.price})</option>`;
+        });
+    } catch (err) {
+        console.error("Fetch failed:", err);
+    }
+}
+        async function submitOrder() {
+            const acc = document.getElementById('accountSelect');
+            const payload = {
+                accountId: acc.value,
+                sf_account_id: acc.options[acc.selectedIndex].getAttribute('data-sf'),
+                productId: document.getElementById('productSelect').value,
+                quantity: document.getElementById('qty').value
+            };
+
+            document.getElementById('status').innerText = "Processing...";
+            
+            const res = await fetch('/create-order', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            document.getElementById('status').innerText = result.success ? "✅ Order Created in Salesforce!" : "❌ Error";
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

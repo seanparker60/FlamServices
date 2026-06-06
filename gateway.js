@@ -1,0 +1,87 @@
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const jwt = require('jsonwebtoken');
+const app = express();
+const cors = require('cors'); // 1. Import cors
+
+// 2. Enable CORS for all origins
+app.use(cors());
+
+const SECRET_KEY = "factory_secret_key_2026";
+
+app.use(express.json());
+
+const authenticate = (req, res, next) => {
+    if (req.path === '/login' || req.path.startsWith('/dashboard')) return next();
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.status(401).json({ error: "No Token" });
+
+    jwt.verify(token, SECRET_KEY, (err) => {
+        if (err) return res.status(403).json({ error: "Invalid Token" });
+        console.log("✅ Gateway: JWT Verified. Handing to Proxy...");
+        next();
+    });
+};
+
+// NEW SYNTAX: Using the 'on' property for event listeners
+const proxyOptions = {
+    target: 'http://localhost:3001',
+    changeOrigin: true,
+    on: {
+        proxyReq: (proxyReq, req, res) => {
+            if (req.body) {
+                console.log("--- Gateway: Re-filling the pipe for:", req.path);
+                const bodyData = JSON.stringify(req.body);
+                proxyReq.setHeader('Content-Type', 'application/json');
+                proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+                proxyReq.write(bodyData);
+            }
+        },
+        proxyRes: (proxyRes, req, res) => {
+            console.log("--- Gateway: Received Response from Service!");
+        },
+        error: (err, req, res) => {
+            console.log("❌ Gateway: Proxy Error!", err.message);
+            res.status(500).send("Proxy Error");
+        }
+    }
+};
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'factory123') {
+        const token = jwt.sign({ user: 'admin' }, SECRET_KEY, { expiresIn: '1h' });
+        return res.json({ token });
+    }
+    res.status(401).json({ error: "Invalid Credentials" });
+});
+
+// Update these to use the new proxyOptions
+app.use('/accounts', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3001' }));
+app.use('/contacts', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3011' }));
+//app.use('/orders',   authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3002' }));
+//app.use('/messages', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3012' }));
+
+app.use('/messages', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3018' }));
+app.use('/cases', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3013'}));
+app.use('/orders', authenticate, createProxyMiddleware({ 
+    target: 'http://localhost:3007', 
+    pathRewrite: { '^/orders': '' },
+    ...proxyOptions 
+}));
+
+app.use('/products', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3003' }));
+
+
+app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true }));
+app.use('/webhooks', authenticate, createProxyMiddleware({ 
+    ...proxyOptions, 
+    target: 'http://localhost:3006',
+    pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
+}));
+
+//app.use('/webhooks', createProxyMiddleware({...proxyOptions, target: 'http://localhost:3006' }));
+
+app.listen(3000, () => console.log('🚀 Gateway: http://localhost:3000'));
