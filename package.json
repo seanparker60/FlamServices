@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently -n \"GATEWAY,ACCT,ORD,PROD,DASH,WORKER,HOOK\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan,bgYellow,bgWhite,bgRed\" \"node gateway.js\" \"node accounts-service.js\" \"node contacts-service.js\" \"node messagesession-service.js\"  \"node case-service.js\"  \"node orders-service.js\" \"node products-service.js\" \"node dashboard-service.js\" \"node worker.js\" \"node webhook-service.js\" \"node ftp-service.js\" \"node ftp-service-ImportOrders.js\"",
+    "start": "concurrently -n \"GATEWAY,ACCT,ORD,PROD,DASH,WORKER,HOOK\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan,bgYellow,bgWhite,bgRed\" \"node gateway.js\" \"node accounts-service.js\" \"node contacts-service.js\" \"node messagesession-service.js\" \"node messagesessionsubsribe.js\" \"node case-service.js\"  \"node orders-service.js\" \"node products-service.js\" \"node dashboard-service.js\" \"node worker.js\" \"node webhook-service.js\" \"node ftp-service.js\" \"node ftp-service-ImportOrders.js\"",
     "gateway": "node gateway.js",
     "worker": "node worker.js"
   },
