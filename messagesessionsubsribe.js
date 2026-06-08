@@ -228,6 +228,6 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`📡 Render PORT Env Variable: ${process.env.PORT}`);
+    console.log(`📡 Render PORT Env Variable: ${process.env.MSGPORT}`);
     console.log(`🚀 Node.js Connection Server listening on port ${PORT}`);
 });
