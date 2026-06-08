@@ -69,9 +69,11 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         const latestCheck = await db.query(latestMsgSql);
         const latestSessions = resultCheck.rows;
 
+        console.log(`latestCheck: ${latestSessions[0].full_name} `);
 
         //const conversationIdentifier = '7c6ca740-51dc-4f3b-b437-fd0b64642aef';
         const conversationIdentifier = latestSessions[0].conversation_id;
+        console.log(`latestCheck:conversationIdentifier ${conversationIdentifier} `);
         //---------------------NEW
 
         const url = `${SF_DOMAIN}/services/data/v61.0/connect/conversation/${conversationIdentifier}/entries`;
