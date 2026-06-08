@@ -36,6 +36,10 @@ app.use(express.json());
 
 // Fetch a valid API access token
 async function getSalesforceToken() {
+
+    console.log(`🔑 Attempting SF Auth via Domain: ${SF_DOMAIN}`);
+    console.log(`🔑 Credentials Present - ClientID: ${!!CLIENT_ID}, Secret: ${!!CLIENT_SECRET}`);
+
     try {
         const params = new URLSearchParams({
             grant_type: 'client_credentials',
@@ -52,6 +56,9 @@ async function getSalesforceToken() {
 
 // The exact API request logic from your successful Apex script
 async function pollEnhancedConnectAPI(conversationIdentifier) {
+
+    console.log(`⏱️ [Loop Triggered] Polling Connect API for: ${conversationIdentifierParam}`);
+
     const token = await getSalesforceToken();
     if (!token) return;
 
@@ -180,7 +187,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
 // SOCKET ORCHESTRATION
 // ══════════════════════════════════════════════════════════════
 io.on('connection', (socket) => {
-    
+    console.log(`🔌 New Client Connected via WebSocket. Socket ID: ${socket.id}`);
     // Frontend sends the working conversationIdentifier string instead of an object ID
     socket.on('watch_session', (conversationIdentifier) => {
         if (!conversationIdentifier || conversationIdentifier.startsWith('YOUR_')) {
