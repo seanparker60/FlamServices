@@ -59,7 +59,21 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         // 🎯 EXACT SAME URL PATH THAT WORKED IN YOUR APEX CODES
     //     const url = `${SF_DOMAIN}/services/data/v61.0/connect/conversation/${conversationIdentifier}/entries`;
 
-        const conversationIdentifier = '7c6ca740-51dc-4f3b-b437-fd0b64642aef';
+    //---------------------NEW
+    const latestMsgSql = `
+            SELECT conversation_id, accesstoken, contact_sf_id, full_name, message_text, message_id
+            FROM messages 
+            WHERE source = 'Mobile' AND conversation_status ='Waiting'
+            ORDER BY created_at DESC limit 1
+        `;
+        const latestCheck = await db.query(latestMsgSql);
+        const latestSessions = resultCheck.rows;
+
+
+        //const conversationIdentifier = '7c6ca740-51dc-4f3b-b437-fd0b64642aef';
+        const conversationIdentifier = latestSessions[0].conversation_id;
+        //---------------------NEW
+
         const url = `${SF_DOMAIN}/services/data/v61.0/connect/conversation/${conversationIdentifier}/entries`;
         const response = await axios.get(url, {
             headers: { 
