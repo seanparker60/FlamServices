@@ -5,7 +5,7 @@ const { Server } = require('socket.io');
 const { Pool } = require('pg'); 
 
 const app = express();
-const PORT = 3020;
+const PORT =process.env.MSGPORT; //3020;
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
@@ -228,5 +228,6 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
+    console.log(`📡 Render PORT Env Variable: ${process.env.PORT}`);
     console.log(`🚀 Node.js Connection Server listening on port ${PORT}`);
 });
