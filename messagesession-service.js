@@ -31,7 +31,7 @@ app.get('/feed/:contactSfId', async (req, res) => {
     const { contactSfId } = req.params;
     try {
         const result = await db.query(
-            `SELECT id, message_text, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
+            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
             [contactSfId]
         );
         res.status(200).json(result.rows);

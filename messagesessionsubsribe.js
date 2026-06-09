@@ -22,7 +22,8 @@ const io = new Server(server, {
 // ══════════════════════════════════════════════════════════════
 // 🔴 ENTER YOUR EXACT SALESFORCE APP CREDENTIALS HERE
 // ══════════════════════════════════════════════════════════════
-const SF_DOMAIN =process.env.MES_SF_DOMAIN; //'https://orgfarm-a37c23459e-dev-ed.develop.my.salesforce.com'; // 🔴 Replace with your domain
+//'https://orgfarm-a37c23459e-dev-ed.develop.my.salesforce.com'; // 🔴 Replace with your domain
+const SF_DOMAIN =process.env.MES_SF_DOMAIN; 
 const CLIENT_ID =process.env.MES_CLIENT_ID; 
 const CLIENT_SECRET =process.env.MES_CLIENT_SECRET; 
 
