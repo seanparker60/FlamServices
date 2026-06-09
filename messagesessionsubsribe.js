@@ -8,7 +8,7 @@ const app = express();
 const PORT =process.env.MSGPORT; //3020;
 const server = http.createServer(app);
 //const io = new Server(server, { cors: { origin: "*" } });
-
+//
 const io = new Server(server, { 
     cors: { 
         origin: "*",               // Allows your mobile app/web app to connect from anywhere
