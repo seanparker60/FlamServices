@@ -49,7 +49,7 @@ async function getSalesforceToken() {
 
     console.log(`🔑 Attempting SF Auth via Domain: ${SF_DOMAIN}`);
     console.log(`🔑 Credentials Present - ClientID: ${!!CLIENT_ID}, Secret: ${!!CLIENT_SECRET}`);
-
+    console.log(`🔑 Credentials Actual - ClientID: ${CLIENT_ID}, Secret: ${CLIENT_SECRET}`);
     try {
         const params = new URLSearchParams({
             grant_type: 'client_credentials',
