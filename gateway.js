@@ -83,5 +83,20 @@ app.use('/webhooks', authenticate, createProxyMiddleware({
 }));
 
 //app.use('/webhooks', createProxyMiddleware({...proxyOptions, target: 'http://localhost:3006' }));
+app.use('/socket.io', createProxyMiddleware({
+    target: 'http://localhost:3020',
+    changeOrigin: true,
+    ws: true, // ⚡ CRITICAL: This is the magic switch that enables WebSocket protocol upgrades!
+    on: {
+        error: (err, req, res) => {
+            console.log("❌ Gateway WebSocket Proxy Error!", err.message);
+            // Don't crash the server if a socket drops
+            if (res.writeHead && !res.headersSent) {
+                res.writeHead(500);
+                res.end("WS Proxy Error");
+            }
+        }
+    }
+}));
 
 app.listen(3000, () => console.log('🚀 Gateway: http://localhost:3000'));
