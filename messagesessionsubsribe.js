@@ -67,7 +67,7 @@ async function getSalesforceToken() {
 // The exact API request logic from your successful Apex script
 async function pollEnhancedConnectAPI(conversationIdentifier) {
 
-    console.log(`⏱️ [Loop Triggered] Polling Connect API for: ${conversationIdentifierParam}`);
+    console.log(`⏱️ [Loop Triggered] Polling Connect API for: ${conversationIdentifier}`);
 
     const token = await getSalesforceToken();
     if (!token) return;
@@ -77,7 +77,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
     //     const url = `${SF_DOMAIN}/services/data/v61.0/connect/conversation/${conversationIdentifier}/entries`;
 
     //---------------------NEW
-    const latestMsgSql = `
+/*    const latestMsgSql = `
             SELECT conversation_id, accesstoken, contact_sf_id, full_name, message_text, message_id
             FROM messages 
             WHERE source = 'Mobile' AND conversation_status ='Waiting'
@@ -92,7 +92,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         const conversationIdentifier = latestSessions[0].conversation_id;
         console.log(`latestCheck:conversationIdentifier ${conversationIdentifier} `);
         //---------------------NEW
-
+*/
         const url = `${SF_DOMAIN}/services/data/v61.0/connect/conversation/${conversationIdentifier}/entries`;
         const response = await axios.get(url, {
             headers: { 
