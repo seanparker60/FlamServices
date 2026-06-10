@@ -115,7 +115,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             SELECT conversation_id, accesstoken, contact_sf_id, full_name, message_text, message_id
             FROM messages 
             WHERE conversation_id = $1 AND message_id IS NOT NULL
-            ORDER BY created_at DESC 
+            ORDER BY created_at ASC 
         `;
 
         // 2. Execute check query passing the conversationIdentifier
@@ -170,7 +170,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
 
         
         const latestEntry = entries[entries.length - 1];
-        const entryId = latestEntry.id; 
+        const entryId = latestEntry.identifier; 
         const messageText = latestEntry.messageText;
         console.log(`pulling Connect entries for messageText:`, entries.length);
         console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
