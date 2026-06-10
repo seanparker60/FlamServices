@@ -169,7 +169,8 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         }
 
         
-        const latestEntry = entries[entries.length - 1];
+       // const latestEntry = entries[entries.length - 1];
+       const latestEntry = entries[0];
         const entryId = latestEntry.identifier; 
         const messageText = latestEntry.messageText;
         console.log(`pulling Connect entries for messageText:`, entries.length);
