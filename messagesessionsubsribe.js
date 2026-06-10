@@ -173,6 +173,9 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         const entryId = latestEntry.id; 
         const messageText = latestEntry.messageText;
         console.log(`pulling Connect entries for messageText:`, entries.length);
+        console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
+        console.log(`pulling Connect entries for messageText:`, messageText);
+        console.log(`pulling Connect entries for entryId:`, entryId);
         
         // Deduplicate: check if this message is new
         if (messageText && lastProcessedIdMap.get(conversationIdentifier) !== entryId) {
