@@ -135,7 +135,8 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
        
         while (index < entries.length) {
         const currentEntry = entries[index];
-        
+        console.log(`ENTRIES Message:`, entries[index].messageText);
+        console.log(`ENTRIES index:`, index); 
         // 4. Only insert if the conversation ID is NOT in our existing list
         if (!existingConversationsSet.has(currentEntry.identifier)) {
             console.log(`currentEntry.identifier: ${currentEntry.identifier} `);
@@ -168,6 +169,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         index++;
         }
 
+       
         
         const latestEntry = entries[entries.length - 1];
       // const latestEntry = entries[0];
