@@ -174,6 +174,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
        
         
       //  const latestEntry = entries[entries.length - 1];
+      if(newEntry != undefined){
        const latestEntry = newEntry;
         const entryId = latestEntry.identifier; 
         const messageText = latestEntry.messageText;
@@ -196,7 +197,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
                 timestamp: latestEntry.clientTimestamp || new Date()
             });
         }
-         
+       }  
     } catch (error) {
         console.error(`❌ Error pulling Connect entries for ${conversationIdentifier}:`, error.response?.data || error.message);
     }
