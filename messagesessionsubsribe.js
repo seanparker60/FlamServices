@@ -133,7 +133,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         
         index = 0;
        
-        const newEntry;
+        const newEntry = entries[index];
         while (index < entries.length) {
         const currentEntry = entries[index];
         console.log(`ENTRIES Message:`, entries[index].messageText);
