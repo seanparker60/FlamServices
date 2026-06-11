@@ -133,6 +133,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         
         index = 0;
        
+        const newEntry = entries[index];
         while (index < entries.length) {
         const currentEntry = entries[index];
         console.log(`ENTRIES Message:`, entries[index].messageText);
@@ -159,6 +160,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             
             // Add to set to prevent further inserts in this loop execution
             existingConversationsSet.add(currentEntry.identifier);
+            newEntry = entries[index];
             } catch (error) {
             console.error(`Failed to insert row at index ${index}:`, error);
             }
@@ -171,11 +173,11 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
 
        
         
-        const latestEntry = entries[entries.length - 1];
-      // const latestEntry = entries[0];
+      //  const latestEntry = entries[entries.length - 1];
+       const latestEntry = newEntry;
         const entryId = latestEntry.identifier; 
         const messageText = latestEntry.messageText;
-        console.log(`pulling Connect entries for messageText:`, entries.length);
+   //     console.log(`pulling Connect entries for messageText:`, entries.length);
         console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
         console.log(`pulling Connect entries for messageText:`, messageText);
         console.log(`pulling Connect entries for entryId:`, entryId);
