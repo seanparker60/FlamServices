@@ -133,7 +133,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         
         index = 0;
        
-        const newEntry = entries[index];
+        var newEntry;// = entries[index];
         while (index < entries.length) {
         const currentEntry = entries[index];
         console.log(`ENTRIES Message:`, entries[index].messageText);
@@ -174,6 +174,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
        
         
       //  const latestEntry = entries[entries.length - 1];
+      console.log(`pulling Connect entries for newEntry:`,newEntry);
       if(newEntry != undefined){
        const latestEntry = newEntry;
         const entryId = latestEntry.identifier; 
