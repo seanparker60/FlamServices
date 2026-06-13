@@ -197,7 +197,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
                 message: messageText,
               //  sender: latestEntry.sender?.role || 'Unknown',
               //  timestamp: latestEntry.clientTimestamp || new Date()
-                sender: 'SF_Web' || 'Unknown',
+                source: 'SF_Web' || 'Unknown',
                 timestamp: newEntry.clientTimestamp || new Date()
             });
         }
