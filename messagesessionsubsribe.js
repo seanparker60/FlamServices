@@ -194,7 +194,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             // Broadcast the text straight to your frontend room
             io.to(conversationIdentifier).emit('new_agent_comment', {
                 conversationIdentifier,
-                message: messageText,
+                message_text: messageText,
               //  sender: latestEntry.sender?.role || 'Unknown',
               //  timestamp: latestEntry.clientTimestamp || new Date()
                 source: 'SF_Web' || 'Unknown',
