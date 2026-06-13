@@ -160,7 +160,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             
             // Add to set to prevent further inserts in this loop execution
             existingConversationsSet.add(currentEntry.identifier);
-            newEntry = entries[index];
+            newEntry = queryParams;
             } catch (error) {
             console.error(`Failed to insert row at index ${index}:`, error);
             }
