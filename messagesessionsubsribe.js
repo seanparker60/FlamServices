@@ -160,7 +160,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             
             // Add to set to prevent further inserts in this loop execution
             existingConversationsSet.add(currentEntry.identifier);
-            newEntry = queryParams;
+            newEntry = entries[index];
             } catch (error) {
             console.error(`Failed to insert row at index ${index}:`, error);
             }
@@ -178,8 +178,8 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
       if(newEntry != undefined){
        const latestEntry = newEntry;
        // const entryId = latestEntry.identifier; 
-        const messageText = newEntry.message_Text;
-        const entryId = newEntry.message_id; 
+        const messageText = newEntry.messageText;
+        const entryId = newEntry.identifier; 
    //     console.log(`pulling Connect entries for messageText:`, entries.length);
         console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
         console.log(`pulling Connect entries for messageText:`, messageText);
@@ -197,8 +197,8 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
                 message: messageText,
               //  sender: latestEntry.sender?.role || 'Unknown',
               //  timestamp: latestEntry.clientTimestamp || new Date()
-                sender: newEntry.source || 'Unknown',
-                timestamp: newEntry.created_at || new Date()
+                sender: 'SF_Web' || 'Unknown',
+                timestamp: newEntry.clientTimestamp || new Date()
             });
         }
        }  
