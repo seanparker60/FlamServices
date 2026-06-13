@@ -178,8 +178,8 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
       if(newEntry != undefined){
        const latestEntry = newEntry;
        // const entryId = latestEntry.identifier; 
-        const messageText = latestEntry.messageText;
-        const entryId = latestEntry.message_id; 
+        const messageText = newEntry.message_Text;
+        const entryId = newEntry.message_id; 
    //     console.log(`pulling Connect entries for messageText:`, entries.length);
         console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
         console.log(`pulling Connect entries for messageText:`, messageText);
@@ -195,8 +195,10 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
             io.to(conversationIdentifier).emit('new_agent_comment', {
                 conversationIdentifier,
                 message: messageText,
-                sender: latestEntry.sender?.role || 'Unknown',
-                timestamp: latestEntry.clientTimestamp || new Date()
+              //  sender: latestEntry.sender?.role || 'Unknown',
+              //  timestamp: latestEntry.clientTimestamp || new Date()
+                sender: newEntry.source || 'Unknown',
+                timestamp: newEntry.created_at || new Date()
             });
         }
        }  
