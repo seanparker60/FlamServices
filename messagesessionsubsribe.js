@@ -177,8 +177,9 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
       console.log(`pulling Connect entries for newEntry:`,newEntry);
       if(newEntry != undefined){
        const latestEntry = newEntry;
-        const entryId = latestEntry.identifier; 
+       // const entryId = latestEntry.identifier; 
         const messageText = latestEntry.messageText;
+        const entryId = latestEntry.message_id; 
    //     console.log(`pulling Connect entries for messageText:`, entries.length);
         console.log(`pulling Connect entries for lastProcessedIdMap:`, lastProcessedIdMap.get(conversationIdentifier));
         console.log(`pulling Connect entries for messageText:`, messageText);
