@@ -55,7 +55,7 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 });
 
 // Inside your Webhook Listener Service
-app.post('/slack', async (req, res) => {
+app.post('/slack-listener', async (req, res) => {
     // 1. Slack URL Verification Challenge (Required by Slack when first setting up)
     console.log("📥 Raw event ping hit microservice port 3006!");
     if (req.body && req.body.type === 'url_verification') {

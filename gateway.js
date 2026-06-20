@@ -88,7 +88,7 @@ app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', c
 app.use('/webhooks/slack', createProxyMiddleware({ 
     target: 'http://localhost:3006', // Points directly to the listener microservice host
     changeOrigin: true,
-    pathRewrite: { '^/webhooks/slack': 'slack' }, // Formats path from /webhooks/slack to /slack
+    pathRewrite: { '^/webhooks/slack': '/slack-listener' }, // Formats path from /webhooks/slack to /slack
     onProxyReq: (proxyReq, req, res) => {
         // 🎯 THE FIX: Reconstruct the swallowed JSON stream if parsed at the gateway level
         if (req.body && Object.keys(req.body).length) {
