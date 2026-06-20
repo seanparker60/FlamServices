@@ -55,38 +55,45 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 });
 
 // Inside your Webhook Listener Service
+
 app.post('/slack-listener', async (req, res) => {
-    // 1. Slack URL Verification Challenge (Required by Slack when first setting up)
-    console.log("📥 Raw event ping hit microservice port 3006!");
-    if (req.body && req.body.type === 'url_verification') {
-        console.log(`🎯 Handshake verified. Returning challenge string: ${req.body.challenge}`);
-        return res.status(200).send(req.body.challenge);
-    }
-    console.log("Received a message from Slack-Body:", req.body);
+    const { event } = req.body || {};
 
-    const { event } = req.body;
+    console.log('[SLACK LISTENR: message:]***'+req.body);
 
-    // 2. Ignore bot messages (stops infinite echo loops when your own service posts)
-    if (event && event.bot_id) {
-        return res.sendStatus(200);
-    }
-
-    // 3. Extract message text and broadcast it via WebSocket
-    if (event && event.type === 'message') {
+    if (event && event.type === 'message' && !event.bot_id) {
         const incomingText = event.text;
-        
-        console.log(`📢 [SLACK WEBHOOK] New reply from internal team: ${incomingText}`);
+        const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // e.g., "C0BCTHLPHRN"
 
-        // Broadcast to your mobile app client instantly over the open socket room
-        // Mirroring your exact data shape so your UI renders it effortlessly!
+        try {
+            // 🎯 STEP 1: Look up the mapping record in your database
+            // Search your conversations table for the row where slack_channel_id matches
+            const conversation = await db.conversations.findOne({ 
+                where: { slack_channel_id: SLACK_CHANNEL_ID } 
+            });
 
-      const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
-        io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
-            conversation_id: SLACK_CHANNEL_ID,
-            message_text: incomingText,
-            source: 'Slack_Web',
-            created_at: new Date()
-        });
+            // If no mapping exists, log it safely without crashing the whole server
+            if (!conversation) {
+                console.error(`⚠️ Missing internal mapping link for Slack Channel: ${SLACK_CHANNEL_ID}`);
+                return res.sendStatus(200); // Acknowledge Slack so it stops retrying
+            }
+
+            // 🎯 STEP 2: Extract your actual native internal ID string
+            const INTERNAL_CONVERSATION_ID = conversation.id; // e.g., "7f9b1c2d-..." or 1482
+
+            console.log(`📢 Map Success! Slack ${SLACK_CHANNEL_ID} -> Internal ID ${INTERNAL_CONVERSATION_ID}`);
+
+            // 🎯 STEP 3: Broadcast using your system's native ID room
+            io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
+                conversation_id: INTERNAL_CONVERSATION_ID, // Mobile app recognizes this!
+                message_text: incomingText,
+                source: 'Slack_Web',
+                created_at: new Date()
+            });
+
+        } catch (dbError) {
+            console.error("🚨 Database lookup failed during Slack routing pipeline:", dbError);
+        }
     }
 
     res.sendStatus(200);
