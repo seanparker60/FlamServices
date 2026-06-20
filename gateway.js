@@ -83,6 +83,7 @@ app.use('/products', authenticate, createProxyMiddleware({ ...proxyOptions, targ
 
 
 app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true }));
+/*
 app.post('/webhooks/slack', (req, res) => {
     console.log("📥 GATEWAY DIRECT HIT! Body received:", req.body);
     
@@ -92,13 +93,23 @@ app.post('/webhooks/slack', (req, res) => {
     
     res.sendStatus(200);
 });
-/*
-app.use('/webhooks/slack', createProxyMiddleware({ 
-    target: 'http://localhost:3006', // Points directly to the listener microservice host
+*/
+app.use('/webhooks/slack', (req, res, next) => {
+    // 1. Keep this here as a safety anchor for any future verification requests
+    if (req.body && req.body.type === 'url_verification') {
+        console.log("🎯 Slack handshake hit Gateway Edge! Echoing challenge...");
+        return res.status(200).send(req.body.challenge);
+    }
+    // 2. Pass normal chat message events smoothly down the pipeline
+    next();
+}, createProxyMiddleware({ 
+    target: 'http://localhost:3006',
     changeOrigin: true,
-    pathRewrite: { '^/webhooks/slack': '/slack-listener' }, // Formats path from /webhooks/slack to /slack
+    pathRewrite: { '^/webhooks/slack': '/slack-listener' },
     onProxyReq: (proxyReq, req, res) => {
-        // 🎯 THE FIX: Reconstruct the swallowed JSON stream if parsed at the gateway level
+        // 🎯 THE STREAMING ANTIDOTE:
+        // Because gateway's express.json() consumed the original request stream,
+        // we manually stringify and pump the payload back into the proxy socket.
         if (req.body && Object.keys(req.body).length) {
             const bodyData = JSON.stringify(req.body);
             proxyReq.setHeader('Content-Type', 'application/json');
@@ -107,7 +118,6 @@ app.use('/webhooks/slack', createProxyMiddleware({
         }
     }
 }));
-*/
 app.use('/webhooks', authenticate, createProxyMiddleware({ 
     ...proxyOptions, 
     target: 'http://localhost:3006',
