@@ -52,4 +52,37 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
     }
 });
 
+// Inside your Webhook Listener Service
+app.post('/slack', async (req, res) => {
+    // 1. Slack URL Verification Challenge (Required by Slack when first setting up)
+    if (req.body.type === 'url_verification') {
+        return res.send(req.body.challenge);
+    }
+
+    const { event } = req.body;
+
+    // 2. Ignore bot messages (stops infinite echo loops when your own service posts)
+    if (event && event.bot_id) {
+        return res.sendStatus(200);
+    }
+
+    // 3. Extract message text and broadcast it via WebSocket
+    if (event && event.type === 'message') {
+        const incomingText = event.text;
+        
+        console.log(`📢 [SLACK WEBHOOK] New reply from internal team: ${incomingText}`);
+
+        // Broadcast to your mobile app client instantly over the open socket room
+        // Mirroring your exact data shape so your UI renders it effortlessly!
+        io.to("slack_channel_room").emit('new_agent_comment', {
+            conversation_id: "slack_channel_room",
+            message_text: incomingText,
+            source: 'Slack_Web',
+            created_at: new Date()
+        });
+    }
+
+    res.sendStatus(200);
+});
+
 app.listen(3006, () => console.log('🔗 Webhook Listener on :3006'));

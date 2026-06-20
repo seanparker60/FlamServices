@@ -82,6 +82,13 @@ app.use('/webhooks', authenticate, createProxyMiddleware({
     pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
 }));
 
+// 🎯 SLACK CHANNEL INTEGRATION
+// Route standard Slack channel payloads to the new internal service process
+app.use('/slack', authenticate, createProxyMiddleware({ 
+    ...proxyOptions, 
+    target: 'http://localhost:3019' 
+}));
+
 //app.use('/webhooks', createProxyMiddleware({...proxyOptions, target: 'http://localhost:3006' }));
 app.use('/socket.io', createProxyMiddleware({
     target: 'http://localhost:3020',
