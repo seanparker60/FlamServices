@@ -60,6 +60,8 @@ app.post('/slack-listener', async (req, res) => {
     const { event } = req.body || {};
 
     console.log('[SLACK LISTENR: message:]***', req.body);
+    console.log('[SLACK LISTENR: event.type:]***', event.type);
+    console.log('[SLACK LISTENR: event.bot_id:]***', event.bot_id);
 
     if (event && event.type === 'message' && !event.bot_id) {
         const incomingText = event.text;
