@@ -59,7 +59,7 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 app.post('/slack-listener', async (req, res) => {
     const { event } = req.body || {};
 
-    console.log('[SLACK LISTENR: message:]***'+req.body);
+    console.log('[SLACK LISTENR: message:]***', req.body);
 
     if (event && event.type === 'message' && !event.bot_id) {
         const incomingText = event.text;
