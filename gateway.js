@@ -3,6 +3,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const jwt = require('jsonwebtoken');
 const app = express();
 const cors = require('cors'); // 1. Import cors
+const axios = require('axios');
 
 // 2. Enable CORS for all origins
 app.use(cors());
@@ -93,31 +94,48 @@ app.post('/webhooks/slack', (req, res) => {
     
     res.sendStatus(200);
 });
-*/
-app.use('/webhooks/slack', (req, res, next) => {
-    // 1. Keep this here as a safety anchor for any future verification requests
+app.post('/webhooks/slack', (req, res) => {
+    console.log("📥 Slack message intercepted at Gateway Edge!");
+
+    // 1. Safety verification handler (just in case Slack re-verifies)
     if (req.body && req.body.type === 'url_verification') {
-        console.log("🎯 Slack handshake hit Gateway Edge! Echoing challenge...");
         return res.status(200).send(req.body.challenge);
     }
-    // 2. Pass normal chat message events smoothly down the pipeline
-    next();
-}, createProxyMiddleware({ 
-    target: 'http://localhost:3006',
-    changeOrigin: true,
-    pathRewrite: { '^/webhooks/slack': '/slack-listener' },
-    onProxyReq: (proxyReq, req, res) => {
-        // 🎯 THE STREAMING ANTIDOTE:
-        // Because gateway's express.json() consumed the original request stream,
-        // we manually stringify and pump the payload back into the proxy socket.
-        if (req.body && Object.keys(req.body).length) {
-            const bodyData = JSON.stringify(req.body);
-            proxyReq.setHeader('Content-Type', 'application/json');
-            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-            proxyReq.write(bodyData);
-        }
+
+    // 2. ⚡ KILL THE TIMEOUT: Respond to Postman/Slack instantly
+    res.status(200).send({ status: "Received by Gateway" });
+
+    // 3. BACKGROUND HANDOFF: Fire-and-forget to port 3006 (No 'await'!)
+    axios.post('http://localhost:3006/slack-listener', req.body, {
+        headers: { 'Content-Type': 'application/json' }
+    }).then(() => {
+        console.log("🚀 Payload background-forwarded to port 3006 successfully!");
+    }).catch((error) => {
+        console.error("🚨 Background forwarding failed:", error.message);
+    });
+});
+*/
+app.post('/webhooks/slack', (req, res) => {
+    console.log("📥 Slack message intercepted at Gateway Edge!");
+
+    // 1. Safety verification handler (just in case Slack re-verifies)
+    if (req.body && req.body.type === 'url_verification') {
+        return res.status(200).send(req.body.challenge);
     }
-}));
+
+    // 2. ⚡ KILL THE TIMEOUT: Respond to Postman/Slack instantly
+    res.status(200).send({ status: "Received by Gateway" });
+
+    // 3. BACKGROUND HANDOFF: Fire-and-forget to port 3006 (No 'await'!)
+    axios.post('http://localhost:3006/slack-listener', req.body, {
+        headers: { 'Content-Type': 'application/json' }
+    }).then(() => {
+        console.log("🚀 Payload background-forwarded to port 3006 successfully!");
+    }).catch((error) => {
+        console.error("🚨 Background forwarding failed:", error.message);
+    });
+});
+
 app.use('/webhooks', authenticate, createProxyMiddleware({ 
     ...proxyOptions, 
     target: 'http://localhost:3006',
