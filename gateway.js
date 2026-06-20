@@ -83,8 +83,16 @@ app.use('/products', authenticate, createProxyMiddleware({ ...proxyOptions, targ
 
 
 app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true }));
-
-
+app.post('/webhooks/slack', (req, res) => {
+    console.log("📥 GATEWAY DIRECT HIT! Body received:", req.body);
+    
+    if (req.body && req.body.type === 'url_verification') {
+        return res.status(200).send(req.body.challenge);
+    }
+    
+    res.sendStatus(200);
+});
+/*
 app.use('/webhooks/slack', createProxyMiddleware({ 
     target: 'http://localhost:3006', // Points directly to the listener microservice host
     changeOrigin: true,
@@ -99,7 +107,7 @@ app.use('/webhooks/slack', createProxyMiddleware({
         }
     }
 }));
-
+*/
 app.use('/webhooks', authenticate, createProxyMiddleware({ 
     ...proxyOptions, 
     target: 'http://localhost:3006',
