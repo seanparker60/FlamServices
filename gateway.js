@@ -115,24 +115,33 @@ app.post('/webhooks/slack', (req, res) => {
     });
 });
 */
+// ==========================================================
+// 🔓 PRODUCTION-READY SLACK WEBHOOK ENTRYPOINT
+// ==========================================================
 app.post('/webhooks/slack', (req, res) => {
     console.log("📥 Slack message intercepted at Gateway Edge!");
 
-    // 1. Safety verification handler (just in case Slack re-verifies)
+    // 1. URL Handshake handler (Always keep this here for safety)
     if (req.body && req.body.type === 'url_verification') {
         return res.status(200).send(req.body.challenge);
     }
 
-    // 2. ⚡ KILL THE TIMEOUT: Respond to Postman/Slack instantly
-    res.status(200).send({ status: "Received by Gateway" });
+    // 2. ⚡ DEFUSE THE 502 & TIMEOUT: Answer Postman/Slack instantly
+    // Sending a clean status here terminates the external connection happily.
+    res.status(200).send({ status: "Accepted by Gateway" });
 
-    // 3. BACKGROUND HANDOFF: Fire-and-forget to port 3006 (No 'await'!)
+    // 3. SECURE BACKGROUND HANDOFF (No await, with robust error catching)
     axios.post('http://localhost:3006/slack-listener', req.body, {
-        headers: { 'Content-Type': 'application/json' }
-    }).then(() => {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 2000 // If port 3006 takes more than 2s, drop it so it doesn't leak memory
+    })
+    .then(() => {
         console.log("🚀 Payload background-forwarded to port 3006 successfully!");
-    }).catch((error) => {
-        console.error("🚨 Background forwarding failed:", error.message);
+    })
+    .catch((error) => {
+        // 🎯 THE ANTIDOTE TO THE 502: Catching the error here prevents 
+        // the gateway from crashing if port 3006 rejects the payload.
+        console.error("🚨 Background forwarding failed, but Gateway remains alive:", error.message);
     });
 });
 
