@@ -20,6 +20,8 @@ const db = new Pool(
 
 // Authentication Middleware
 const authenticate = (req, res, next) => {
+
+    console.log(`[WEBHOOK] authenticate`);
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
