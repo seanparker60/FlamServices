@@ -83,11 +83,8 @@ app.use('/products', authenticate, createProxyMiddleware({ ...proxyOptions, targ
 
 
 app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true }));
-app.use('/webhooks', authenticate, createProxyMiddleware({ 
-    ...proxyOptions, 
-    target: 'http://localhost:3006',
-    pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
-}));
+
+
 app.use('/webhooks/slack', createProxyMiddleware({ 
     target: 'http://localhost:3006', // Points directly to the listener microservice host
     changeOrigin: true,
@@ -102,6 +99,13 @@ app.use('/webhooks/slack', createProxyMiddleware({
         }
     }
 }));
+
+app.use('/webhooks', authenticate, createProxyMiddleware({ 
+    ...proxyOptions, 
+    target: 'http://localhost:3006',
+    pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
+}));
+
 // 🎯 SLACK CHANNEL INTEGRATION
 // Route standard Slack channel payloads to the new internal service process
 app.use('/slack', authenticate, createProxyMiddleware({ 
