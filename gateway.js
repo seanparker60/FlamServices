@@ -6,6 +6,7 @@ const cors = require('cors'); // 1. Import cors
 
 // 2. Enable CORS for all origins
 app.use(cors());
+app.options('*', cors());
 
 const SECRET_KEY = "factory_secret_key_2026";
 
@@ -83,10 +84,10 @@ app.use('/webhooks', authenticate, createProxyMiddleware({
 }));
 app.use('/webhooks/slack', createProxyMiddleware({ 
     ...proxyOptions, 
-    target: 'http://localhost:3006/slack', // Direct routing to the exact target endpoint
-    pathRewrite: { '^/webhooks/slack': '' }, // Strips the full gateway path prefix cleanly
+    target: 'http://localhost:3006/slack', // Sends it straight to the service route
+    pathRewrite: { '^/webhooks/slack': '' }, // Strips the gateway URL footprint cleanly
     onProxyReq: (proxyReq, req, res) => {
-        // 🛡️ CRITICAL FIX: Reconstruct the swallowed body stream if parsed at the gateway level
+        // Restore payload streams if body-parser has already consumed them
         if (req.body && Object.keys(req.body).length) {
             const bodyData = JSON.stringify(req.body);
             proxyReq.setHeader('Content-Type', 'application/json');
