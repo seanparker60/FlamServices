@@ -6,7 +6,7 @@ const cors = require('cors'); // 1. Import cors
 
 // 2. Enable CORS for all origins
 app.use(cors());
-app.options('*', cors());
+app.options('(.*)', cors());
 
 const SECRET_KEY = "factory_secret_key_2026";
 
