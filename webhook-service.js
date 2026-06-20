@@ -79,8 +79,10 @@ app.post('/slack-listener', async (req, res) => {
 
         // Broadcast to your mobile app client instantly over the open socket room
         // Mirroring your exact data shape so your UI renders it effortlessly!
-        io.to("slack_channel_room").emit('new_agent_comment', {
-            conversation_id: "slack_channel_room",
+
+      const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
+        io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
+            conversation_id: SLACK_CHANNEL_ID,
             message_text: incomingText,
             source: 'Slack_Web',
             created_at: new Date()
