@@ -82,12 +82,20 @@ app.use('/webhooks', authenticate, createProxyMiddleware({
     target: 'http://localhost:3006',
     pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
 }));
-app.use('/webhooks/slack', createProxyMiddleware({ 
+app.use('/webhooks/slack', (req, res, next) => {
+    // 1. 🔥 FORCE VERIFICATION AT THE EDGE: Bypass the proxy completely for the challenge
+    if (req.body && req.body.type === 'url_verification') {
+        console.log("🎯 Slack handshake intercepted at Gateway Edge! Echoing challenge...");
+        return res.status(200).send(req.body.challenge);
+    }
+    // If it's a normal message event, pass it down to the microservice
+    next();
+}, createProxyMiddleware({ 
     ...proxyOptions, 
-    target: 'http://localhost:3006/slack', // Sends it straight to the service route
-    pathRewrite: { '^/webhooks/slack': '' }, // Strips the gateway URL footprint cleanly
+    target: 'http://localhost:3006/slack', 
+    pathRewrite: { '^/webhooks/slack': '' },
     onProxyReq: (proxyReq, req, res) => {
-        // Restore payload streams if body-parser has already consumed them
+        // Restore parsed payload streams for the microservice downstream
         if (req.body && Object.keys(req.body).length) {
             const bodyData = JSON.stringify(req.body);
             proxyReq.setHeader('Content-Type', 'application/json');
