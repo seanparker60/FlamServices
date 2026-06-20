@@ -55,8 +55,9 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 // Inside your Webhook Listener Service
 app.post('/slack', async (req, res) => {
     // 1. Slack URL Verification Challenge (Required by Slack when first setting up)
+    
     if (req.body.type === 'url_verification') {
-        return res.send(req.body.challenge);
+        return res.status(200).send(req.body.challenge);
     }
 
     const { event } = req.body;
