@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken'); // Added for authentication
 const app = express();
-app.use(express.json());
+
 
 const SECRET_KEY = "factory_secret_key_2026"; // Must match Gateway key
 const db = new Pool(
@@ -89,5 +89,6 @@ app.post('/slack-listener', async (req, res) => {
 
     res.sendStatus(200);
 });
+app.use(express.json());
 
 app.listen(3006, () => console.log('🔗 Webhook Listener on :3006'));
