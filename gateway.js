@@ -81,7 +81,20 @@ app.use('/webhooks', authenticate, createProxyMiddleware({
     target: 'http://localhost:3006',
     pathRewrite: { '^/webhooks': '' } // This removes "/webhooks" from the URL
 }));
-
+app.use('/webhooks/slack', createProxyMiddleware({ 
+    ...proxyOptions, 
+    target: 'http://localhost:3006/slack', // Direct routing to the exact target endpoint
+    pathRewrite: { '^/webhooks/slack': '' }, // Strips the full gateway path prefix cleanly
+    onProxyReq: (proxyReq, req, res) => {
+        // 🛡️ CRITICAL FIX: Reconstruct the swallowed body stream if parsed at the gateway level
+        if (req.body && Object.keys(req.body).length) {
+            const bodyData = JSON.stringify(req.body);
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            proxyReq.write(bodyData);
+        }
+    }
+}));
 // 🎯 SLACK CHANNEL INTEGRATION
 // Route standard Slack channel payloads to the new internal service process
 app.use('/slack', authenticate, createProxyMiddleware({ 
