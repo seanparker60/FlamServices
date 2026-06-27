@@ -17,7 +17,9 @@ const db = new Pool(
         port: 3030
     }
 );
-
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
 // Authentication Middleware
 const authenticate = (req, res, next) => {
 
@@ -87,7 +89,7 @@ app.post('/slack-listener', async (req, res) => {
             console.log(`📢 Map Success! Slack ${SLACK_CHANNEL_ID} -> Internal ID ${INTERNAL_CONVERSATION_ID}`);
             */
 
-            
+
             // 🎯 STEP 3: Broadcast using your system's native ID room
            // io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
            io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
