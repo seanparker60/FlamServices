@@ -109,7 +109,7 @@ app.post('/slack-listener', async (req, res) => {
             */
             
 
-            await axios.post('http://localhost:3020/api/broadcast', {
+            await axios.post('http://localhost:3020/api/internal-broadcast', {
             room: SLACK_CHANNEL_ID, // "C0BCTHLPHRN"
             event_name: 'new_agent_comment',
             payload: {
