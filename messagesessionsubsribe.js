@@ -251,6 +251,21 @@ io.on('connection', (socket) => {
     });
 });
 
+app.post('/api/internal-broadcast', (req, res) => {
+    const { room, event_name, payload } = req.body;
+
+    if (!room || !event_name || !payload) {
+        return res.status(400).json({ error: "Missing required bridge broadcast properties." });
+    }
+
+    console.log(`📡 [Bridge Event] Forwarding Slack message safely into WebSocket Room: ${room}`);
+
+    // 🎯 Use the existing 'io' engine already initialized in this file to alert the mobile app
+    io.to(room).emit(event_name, payload);
+
+    return res.sendStatus(200);
+});
+
 server.listen(PORT, () => {
     console.log(`📡 Render PORT Env Variable: ${process.env.MSGPORT}`);
     console.log(`🚀 Node.js Connection Server listening on port ${PORT}`);

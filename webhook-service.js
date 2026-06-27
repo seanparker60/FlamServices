@@ -105,12 +105,20 @@ app.post('/slack-listener', async (req, res) => {
                 created_at: new Date()
             });
             */
-            io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
-                SLACK_CHANNEL_ID,
+            
+
+            await axios.post('http://localhost:3020/api/broadcast', {
+            room: SLACK_CHANNEL_ID, // "C0BCTHLPHRN"
+            event_name: 'new_agent_comment',
+            payload: {
+                conversation_id: SLACK_CHANNEL_ID,
                 message_text: incomingText,
                 source: 'Slack_Web',
                 created_at: new Date()
-            });
+            }
+        });
+
+
             console.log(`📢 Map Success! after Slack ${SLACK_CHANNEL_ID}`);
 
         } catch (dbError) {
