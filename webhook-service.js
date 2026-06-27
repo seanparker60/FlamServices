@@ -2,7 +2,9 @@ const express = require('express');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken'); // Added for authentication
 const app = express();
+const http = require('http');
 const { Server } = require('socket.io');
+
 app.use(express.json());
 const server = http.createServer(app);
 
