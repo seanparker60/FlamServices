@@ -70,6 +70,7 @@ app.post('/slack-listener', async (req, res) => {
         try {
             // 🎯 STEP 1: Look up the mapping record in your database
             // Search your conversations table for the row where slack_channel_id matches
+           /*
             const conversation = await db.conversations.findOne({ 
                 where: { slack_channel_id: SLACK_CHANNEL_ID } 
             });
@@ -84,7 +85,9 @@ app.post('/slack-listener', async (req, res) => {
             const INTERNAL_CONVERSATION_ID = conversation.id; // e.g., "7f9b1c2d-..." or 1482
 
             console.log(`📢 Map Success! Slack ${SLACK_CHANNEL_ID} -> Internal ID ${INTERNAL_CONVERSATION_ID}`);
+            */
 
+            
             // 🎯 STEP 3: Broadcast using your system's native ID room
            // io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
            io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
