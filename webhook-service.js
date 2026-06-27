@@ -2,7 +2,9 @@ const express = require('express');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken'); // Added for authentication
 const app = express();
+const { Server } = require('socket.io');
 app.use(express.json());
+const server = http.createServer(app);
 
 const SECRET_KEY = "factory_secret_key_2026"; // Must match Gateway key
 const db = new Pool(
