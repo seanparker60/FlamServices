@@ -86,7 +86,8 @@ app.post('/slack-listener', async (req, res) => {
             console.log(`📢 Map Success! Slack ${SLACK_CHANNEL_ID} -> Internal ID ${INTERNAL_CONVERSATION_ID}`);
 
             // 🎯 STEP 3: Broadcast using your system's native ID room
-            io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
+           // io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
+           io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
                 conversation_id: INTERNAL_CONVERSATION_ID, // Mobile app recognizes this!
                 message_text: incomingText,
                 source: 'Slack_Web',
