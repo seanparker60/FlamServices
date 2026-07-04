@@ -28,6 +28,8 @@ app.post('/message', async (req, res) => {
     const { message_text, user_name } = req.body;
 
     try {
+console.log('Server-slack: Before post');
+
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: SLACK_CHANNEL_ID,
             // Format it nicely so your team knows it came from the mobile app
@@ -52,15 +54,16 @@ app.post('/message', async (req, res) => {
             INSERT INTO slack_messages (conversation_id, sender_id, message_text, slack_ts, source, created_at)
             VALUES ($1, $2, $3, $4, $5, NOW());
         `;
-        console.log('Before insert to Postgress:');
-        await db.query(insertQuery, [
+        console.log('Server-slack: Before insert to Postgress:');
+       const dbResult = await db.query(insertQuery, [
             SLACK_CHANNEL_ID,       // conversation_id
             user_name || 'Mobile',  // sender_id identity tracking
             message_text,           // original message clean text
             SLACK_TS,               // slack unique ts token
             'Mobile_App'            // source tracking string
         ]);
-        console.log('After insert to Postgress:');
+        console.log(`Server-slack: 💾 Saved to slack_messages table. Row Entry ID: ${dbResult.rows[0].id}`);
+        console.log('Server-slack: After insert to Postgress:');
 
         res.json({ success: true, ts: response.data.ts }); // 'ts' is Slack's timestamp ID
     } catch (error) {

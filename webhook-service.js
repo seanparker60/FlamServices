@@ -126,7 +126,7 @@ app.post('/slack-listener', async (req, res) => {
             INSERT INTO slack_messages (channel_id, user_id, message_text, slack_ts, source, created_at)
             VALUES ($1, $2, $3, $4, $5, NOW())
             RETURNING id; `;
-            const dbResult = await dbPool.query(insertQuery, [
+            const dbResult = await db.query(insertQuery, [
                 SLACK_CHANNEL_ID, 
                 SLACK_USER_ID, 
                 incomingText, 
