@@ -7,6 +7,21 @@ app.use(express.json());
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN; 
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // The target channel (e.g., #customer-support)
 
+const db = new Pool(
+    process.env.DATABASE_URL ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    } : {
+        host: 'localhost',
+        user: 'postgres',
+        password: 'flam123',
+        database: 'integration_factory',
+        port: 3030
+    }
+);
+
+
+
 // 📱 Endpoint A: Mobile App sends a message TO Slack
 app.post('/message', async (req, res) => {
     const { message_text, user_name } = req.body;
