@@ -27,6 +27,24 @@ app.post('/message', async (req, res) => {
             throw new Error(response.data.error);
         }
 
+        const SLACK_TS = response.data.ts; // 'ts' is Slack's unique timestamp ID
+
+        // =========================================================
+        // 💾 DATABASE LOGIC ONLY: SAVE OUTBOUND TO SLACK_MESSAGES
+        // =========================================================
+        const insertQuery = `
+            INSERT INTO slack_messages (conversation_id, sender_id, message_text, slack_ts, source, created_at)
+            VALUES ($1, $2, $3, $4, $5, NOW());
+        `;
+        
+        await dbPool.query(insertQuery, [
+            SLACK_CHANNEL_ID,       // conversation_id
+            user_name || 'Mobile',  // sender_id identity tracking
+            message_text,           // original message clean text
+            SLACK_TS,               // slack unique ts token
+            'Mobile_App'            // source tracking string
+        ]);
+
         res.json({ success: true, ts: response.data.ts }); // 'ts' is Slack's timestamp ID
     } catch (error) {
         console.error('❌ Failed to push message to Slack:', error.message);

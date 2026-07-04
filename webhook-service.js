@@ -65,11 +65,26 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 // Inside your Webhook Listener Service
 
 app.post('/slack-listener', async (req, res) => {
-    const { event } = req.body || {};
+    res.sendStatus(200); 
 
+    const { event } = req.body || {};
     console.log('[SLACK LISTENR: event.text:]***', event.text);
     console.log('[SLACK LISTENR: event.type:]***', event.type);
     console.log('[SLACK LISTENR: event.bot_id:]***', event.bot_id);
+    // Ignore bot messages, message edits, or system join events
+    if (!event || event.bot_id || event.type !== 'message' || event.subtype) {
+        return;
+    }
+
+    const incomingText = event.text;
+    const SLACK_CHANNEL_ID = event.channel; // e.g., "C0BCTHLPHRN"
+    const SLACK_USER_ID = event.user;
+    const MESSAGE_TS = event.ts; // Slack's unique timestamp ID for this specific message
+
+    console.log(`📥 Incoming Slack message from user ${SLACK_USER_ID} in channel ${SLACK_CHANNEL_ID}`);
+
+
+    
 
     if (event && event.type === 'message' && !event.bot_id) {
         const incomingText = event.text;
@@ -107,7 +122,19 @@ app.post('/slack-listener', async (req, res) => {
                 created_at: new Date()
             });
             */
-            
+            const insertQuery = `
+            INSERT INTO slack_messages (channel_id, user_id, message_text, slack_ts, source, created_at)
+            VALUES ($1, $2, $3, $4, $5, NOW())
+            RETURNING id; `;
+            const dbResult = await dbPool.query(insertQuery, [
+                SLACK_CHANNEL_ID, 
+                SLACK_USER_ID, 
+                incomingText, 
+                MESSAGE_TS,
+                'Slack_Web'
+            ]);
+        
+            console.log(`💾 Saved to slack_messages table. Row Entry ID: ${dbResult.rows[0].id}`);
 
             await axios.post('http://localhost:3020/api/internal-broadcast', {
             room: SLACK_CHANNEL_ID, // "C0BCTHLPHRN"
