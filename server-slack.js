@@ -52,7 +52,7 @@ app.post('/message', async (req, res) => {
             INSERT INTO slack_messages (conversation_id, sender_id, message_text, slack_ts, source, created_at)
             VALUES ($1, $2, $3, $4, $5, NOW());
         `;
-        
+        console.log('Before insert to Postgress:');
         await db.query(insertQuery, [
             SLACK_CHANNEL_ID,       // conversation_id
             user_name || 'Mobile',  // sender_id identity tracking
@@ -60,7 +60,8 @@ app.post('/message', async (req, res) => {
             SLACK_TS,               // slack unique ts token
             'Mobile_App'            // source tracking string
         ]);
-
+        console.log('After insert to Postgress:');
+        
         res.json({ success: true, ts: response.data.ts }); // 'ts' is Slack's timestamp ID
     } catch (error) {
         console.error('❌ Failed to push message to Slack:', error.message);
