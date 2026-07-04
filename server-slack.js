@@ -52,7 +52,7 @@ app.post('/message', async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, NOW());
         `;
         
-        await dbPool.query(insertQuery, [
+        await db.query(insertQuery, [
             SLACK_CHANNEL_ID,       // conversation_id
             user_name || 'Mobile',  // sender_id identity tracking
             message_text,           // original message clean text
