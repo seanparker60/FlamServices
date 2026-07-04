@@ -38,7 +38,7 @@ app.post('/message', async (req, res) => {
                 'Content-Type': 'application/json; charset=utf-8'
             }
         });
-
+        console.log('After Insert to Slack:'+response.data.error);
         if (!response.data.ok) {
             throw new Error(response.data.error);
         }
@@ -61,7 +61,7 @@ app.post('/message', async (req, res) => {
             'Mobile_App'            // source tracking string
         ]);
         console.log('After insert to Postgress:');
-        
+
         res.json({ success: true, ts: response.data.ts }); // 'ts' is Slack's timestamp ID
     } catch (error) {
         console.error('❌ Failed to push message to Slack:', error.message);
