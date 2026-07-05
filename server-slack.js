@@ -144,6 +144,7 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
         `;
         
         await db.query(insertQuery, [
+            contactSfId,
             DYNAMIC_CHANNEL_ID, // Saved dynamically now! (Ensure column type is altered to VARCHAR)
             user_name || 'Mobile',  
             message_text,           
