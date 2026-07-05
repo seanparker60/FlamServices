@@ -39,7 +39,7 @@ app.get('/feed/:contactSfId', async (req, res) => {
 // 📱 Endpoint A: Mobile App sends a message TO Slack
 app.post('/message', async (req, res) => {
     const {contactSfId, message_text, user_name } = req.body;
-
+console.log('SLACK POST:contactSfId:'+contactSfId);
     try {
 console.log('Server-slack: Before post');
 
