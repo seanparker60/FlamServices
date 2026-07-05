@@ -134,7 +134,7 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
         }
 
         const SLACK_TS = response.data.ts; 
-
+console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS'+SLACK_TS);
         // =========================================================
         // STEP 3: LOG THE DYNAMIC ID INTO POSTGRES
         // =========================================================
