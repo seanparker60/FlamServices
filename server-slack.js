@@ -122,7 +122,7 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
 try {
     await axios.post('https://slack.com/api/conversations.invite', {
         channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
-        users: 'U0XXXXXXX'           // 🎯 Put your exact User Member ID string here
+        users: 'U0BA17L3N6T'           // 🎯 Put your exact User Member ID string here
     }, {
         headers: {
             'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
