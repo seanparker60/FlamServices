@@ -21,11 +21,24 @@ const db = new Pool(
     }
 );
 
-
+// GET: Mobile App Feed Reader
+app.get('/feed/:contactSfId', async (req, res) => {
+    const { contactSfId } = req.params;
+    try {
+        const result = await db.query(
+            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
+            [contactSfId]
+        );
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error("Failed to fetch messages:", error);
+        res.status(500).json({ error: "Failed to retrieve message feed" });
+    }
+});
 
 // 📱 Endpoint A: Mobile App sends a message TO Slack
 app.post('/message', async (req, res) => {
-    const { message_text, user_name } = req.body;
+    const {contactSfId, message_text, user_name } = req.body;
 
     try {
 console.log('Server-slack: Before post');
@@ -51,11 +64,12 @@ console.log('Server-slack: Before post');
         // 💾 DATABASE LOGIC ONLY: SAVE OUTBOUND TO SLACK_MESSAGES
         // =========================================================
         const insertQuery = `
-            INSERT INTO slack_messages (conversation_id, sender_id, message_text, slack_ts, source, created_at)
-            VALUES ($1, $2, $3, $4, $5, NOW());
+            INSERT INTO slack_messages (contact_sf_id,conversation_id, sender_id, message_text, slack_ts, source, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, NOW());
         `;
         console.log('Server-slack: Before insert to Postgress:');
        const dbResult = await db.query(insertQuery, [
+            contactSfId,
             SLACK_CHANNEL_ID,       // conversation_id
             user_name || 'Mobile',  // sender_id identity tracking
             message_text,           // original message clean text
