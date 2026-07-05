@@ -108,7 +108,7 @@ app.post('/message', async (req, res) => {
                 'Content-Type': 'application/json; charset=utf-8'
             }
         });
-
+console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
         if (!createChannelResponse.data.ok) {
             throw new Error(`Slack Channel creation failed: ${createChannelResponse.data.error}`);
         }
