@@ -100,8 +100,9 @@ app.post('/message', async (req, res) => {
         const cleanName = `chat-${(user_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
 
         const createChannelResponse = await axios.post('https://slack.com/api/conversations.create', {
-            name: cleanName,
-            is_private: false // Change to true if you want private triage rooms
+            name: cleanName, 
+            is_private: false, // Change to true if you want private triage rooms
+            users: 'U0BA17L3N6T'
         }, {
             headers: {
                 'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
