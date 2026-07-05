@@ -116,9 +116,25 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
 
         // 🎯 This is the dynamic 'C0...' ID generated on the fly by Slack!
         const DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id; 
-
         // =========================================================
-        // STEP 2: POST THE INTERACTION TO THE NEWLY CREATED ROOM
+// STEP 2: RUN THE INVITATION (This pulls you into the room)
+// =========================================================
+try {
+    await axios.post('https://slack.com/api/conversations.invite', {
+        channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
+        users: 'U0XXXXXXX'           // 🎯 Put your exact User Member ID string here
+    }, {
+        headers: {
+            'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+    });
+    console.log(`👥 Successfully pulled user into channel ${DYNAMIC_CHANNEL_ID}`);
+} catch (inviteError) {
+    console.error('⚠️ Could not auto-invite user:', inviteError.response?.data?.error || inviteError.message);
+}
+        // =========================================================
+        // STEP 3: POST THE INTERACTION TO THE NEWLY CREATED ROOM
         // =========================================================
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: DYNAMIC_CHANNEL_ID, // ⚡ Sent to the new channel
