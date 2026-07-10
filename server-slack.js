@@ -100,7 +100,7 @@ app.post('/message', async (req, res) => {
             [contactSfId]
         );
 
-        DYNAMIC_CHANNEL_ID = result.rows.length > 0 ? result.rows[0].contact_sf_id : null;
+        DYNAMIC_CHANNEL_ID = result.rows.length > 0 ? result.rows[0].conversation_id : null;
 
 
       if(DYNAMIC_CHANNEL_ID == null){  
