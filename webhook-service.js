@@ -155,11 +155,12 @@ app.post('/slack-listener', async (req, res) => {
             }
         });
 
-
+            return res.sendStatus(200);
             console.log(`📢 Map Success! after Slack ${SLACK_CHANNEL_ID}`);
 
         } catch (dbError) {
             console.error("🚨 Database lookup failed during Slack routing pipeline:", dbError);
+            return res.sendStatus(500);
         }
     }
 
