@@ -109,7 +109,7 @@ app.post('/message', async (req, res) => {
                 'Content-Type': 'application/json; charset=utf-8'
             }
         });
-console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
+        console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
         if (!createChannelResponse.data.ok) {
             throw new Error(`Slack Channel creation failed: ${createChannelResponse.data.error}`);
         }
@@ -117,22 +117,22 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
         // 🎯 This is the dynamic 'C0...' ID generated on the fly by Slack!
         const DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id; 
         // =========================================================
-// STEP 2: RUN THE INVITATION (This pulls you into the room)
-// =========================================================
-try {
-    await axios.post('https://slack.com/api/conversations.invite', {
-        channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
-        users: 'U0BA17L3N6T'           // 🎯 Put your exact User Member ID string here
-    }, {
-        headers: {
-            'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-            'Content-Type': 'application/json; charset=utf-8'
+        // STEP 2: RUN THE INVITATION (This pulls you into the room)
+        // =========================================================
+        try {
+            await axios.post('https://slack.com/api/conversations.invite', {
+                channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
+                users: 'U0BA17L3N6T'           // 🎯 Put your exact User Member ID string here
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            });
+            console.log(`👥 Successfully pulled user into channel ${DYNAMIC_CHANNEL_ID}`);
+        } catch (inviteError) {
+            console.error('⚠️ Could not auto-invite user:', inviteError.response?.data?.error || inviteError.message);
         }
-    });
-    console.log(`👥 Successfully pulled user into channel ${DYNAMIC_CHANNEL_ID}`);
-} catch (inviteError) {
-    console.error('⚠️ Could not auto-invite user:', inviteError.response?.data?.error || inviteError.message);
-}
         // =========================================================
         // STEP 3: POST THE INTERACTION TO THE NEWLY CREATED ROOM
         // =========================================================
