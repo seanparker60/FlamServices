@@ -65,7 +65,7 @@ app.post('/salesforce-update', authenticate, async (req, res) => {
 // Inside your Webhook Listener Service
 
 app.post('/slack-listener', async (req, res) => {
-    res.sendStatus(200); 
+   // res.sendStatus(200); 
 
     const { event } = req.body || {};
     console.log('[SLACK LISTENR: event.text:]***', event.text);
@@ -99,26 +99,7 @@ app.post('/slack-listener', async (req, res) => {
             [SLACK_CHANNEL_ID]
         );
 
-           /*
-            const conversation = await db.conversations.findOne({ 
-                where: { slack_channel_id: SLACK_CHANNEL_ID } 
-            });
-
-            // If no mapping exists, log it safely without crashing the whole server
-            if (!conversation) {
-                console.error(`⚠️ Missing internal mapping link for Slack Channel: ${SLACK_CHANNEL_ID}`);
-                return res.sendStatus(200); // Acknowledge Slack so it stops retrying
-            }
-
-            // 🎯 STEP 2: Extract your actual native internal ID string
-            const INTERNAL_CONVERSATION_ID = conversation.id; // e.g., "7f9b1c2d-..." or 1482
-
-            console.log(`📢 Map Success! Slack ${SLACK_CHANNEL_ID} -> Internal ID ${INTERNAL_CONVERSATION_ID}`);
-            */
-
-
-            // 🎯 STEP 3: Broadcast using your system's native ID room
-           // io.to(INTERNAL_CONVERSATION_ID).emit('new_agent_comment', {
+         
            console.log(`📢 Map Success! before Slack ${SLACK_CHANNEL_ID}`);
            /*io.to(SLACK_CHANNEL_ID).emit('new_agent_comment', {
                // conversation_id: INTERNAL_CONVERSATION_ID, // Mobile app recognizes this!
@@ -155,7 +136,7 @@ app.post('/slack-listener', async (req, res) => {
             }
         });
 
-            return res.sendStatus(200);
+           // return res.sendStatus(200);
             console.log(`📢 Map Success! after Slack ${SLACK_CHANNEL_ID}`);
 
         } catch (dbError) {
