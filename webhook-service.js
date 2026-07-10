@@ -95,7 +95,7 @@ app.post('/slack-listener', async (req, res) => {
             // Search your conversations table for the row where slack_channel_id matches
 
         const result = await db.query(
-            `SELECT id,contact_sf_id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE conversation_id = $1 ORDER BY created_at ASC`, 
+            `SELECT id,contact_sf_id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE conversation_id = $1 AND contact_sf_id IS NOT NULL ORDER BY created_at ASC`, 
             [SLACK_CHANNEL_ID]
         );
 
@@ -128,7 +128,7 @@ app.post('/slack-listener', async (req, res) => {
                 created_at: new Date()
             });
             */
-           const CONTACTID =result[0].contact_sf_id;
+           const CONTACTID = result.rows.length > 0 ? result.rows[0].contact_sf_id : null;
             const insertQuery = `
             INSERT INTO slack_messages (contact_sf_id,conversation_id, sender_id, message_text, slack_ts, source, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, NOW())
