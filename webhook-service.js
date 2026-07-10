@@ -88,7 +88,7 @@ app.post('/slack-listener', async (req, res) => {
 
     if (event && event.type === 'message' && !event.bot_id) {
         const incomingText = event.text;
-        const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // e.g., "C0BCTHLPHRN"
+       // const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // e.g., "C0BCTHLPHRN"
 
         try {
             // 🎯 STEP 1: Look up the mapping record in your database
