@@ -91,8 +91,19 @@ console.log('Server-slack: Before post');
 // 📱 Endpoint A: Mobile App starts a fresh conversation session
 app.post('/message', async (req, res) => {
     const { contactSfId,message_text, user_name } = req.body;
+    var DYNAMIC_CHANNEL_ID;
 
     try {
+
+        const result = await db.query(
+            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
+            [contactSfId]
+        );
+
+        DYNAMIC_CHANNEL_ID = result.rows.length > 0 ? result.rows[0].contact_sf_id : null;
+
+
+      if(DYNAMIC_CHANNEL_ID == null){  
         // =========================================================
         // 🆕 STEP 1: DYNAMICALLY CREATE A NEW SLACK CHANNEL
         // =========================================================
@@ -115,7 +126,7 @@ app.post('/message', async (req, res) => {
         }
 
         // 🎯 This is the dynamic 'C0...' ID generated on the fly by Slack!
-        const DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id; 
+        DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id; 
         // =========================================================
         // STEP 2: RUN THE INVITATION (This pulls you into the room)
         // =========================================================
@@ -136,6 +147,8 @@ app.post('/message', async (req, res) => {
         // =========================================================
         // STEP 3: POST THE INTERACTION TO THE NEWLY CREATED ROOM
         // =========================================================
+    }
+       
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: DYNAMIC_CHANNEL_ID, // ⚡ Sent to the new channel
             text: `📱 *New Support Session Started by ${user_name}:*\n${message_text}`
@@ -151,7 +164,7 @@ app.post('/message', async (req, res) => {
         }
 
         const SLACK_TS = response.data.ts; 
-console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS'+SLACK_TS);
+        console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS'+SLACK_TS);
         // =========================================================
         // STEP 3: LOG THE DYNAMIC ID INTO POSTGRES
         // =========================================================
@@ -176,6 +189,7 @@ console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS'+SLACK_TS);
         console.error('❌ Failed to process dynamic pipeline step:', error.message);
         res.status(500).json({ error: 'Internal failure processing session creation', details: error.message });
     }
+    
 });
 
 app.listen(3019, () => console.log('[SLACK] 💬 Slack Channel Service live on 3019'));
