@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN; 
-const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN; 
+const SLACK_USER_TOKEN = process.env.SLACK_USER_TOKEN; 
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // The target channel (e.g., #customer-support)
 const AGENTFORCE_BOT_ID = process.env.AGENTFORCE_BOT_ID || 'U0BJKS8T267';
 
