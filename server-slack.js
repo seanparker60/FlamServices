@@ -5,10 +5,11 @@ const app = express();
 
 app.use(express.json());
 
-const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN; 
-const SLACK_USER_TOKEN = process.env.SLACK_USER_TOKEN; 
-const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // The target channel (e.g., #customer-support)
-const AGENTFORCE_BOT_ID = process.env.AGENTFORCE_BOT_ID || 'U0BJKS8T267';
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
+const SLACK_USER_TOKEN = process.env.SLACK_USER_TOKEN; // your admin user's token, needed for DM mode and agent mentions
+const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
+const AGENTFORCE_BOT_ID = process.env.AGENTFORCE_BOT_ID; // 'U0BJKS8T267'
+const SLACK_USE_DM = process.env.SLACK_USE_DM; // boolean flag from env process.env.SLACK_USE_DM === 'true';
 
 const db = new Pool(
     process.env.DATABASE_URL ? {
@@ -28,7 +29,7 @@ app.get('/feed/:contactSfId', async (req, res) => {
     const { contactSfId } = req.params;
     try {
         const result = await db.query(
-            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
+            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`,
             [contactSfId]
         );
         res.status(200).json(result.rows);
@@ -38,127 +39,97 @@ app.get('/feed/:contactSfId', async (req, res) => {
     }
 });
 
-// 📱 Endpoint A: Mobile App sends a message TO Slack
-/*
-app.post('/message', async (req, res) => {
-    const {contactSfId, message_text, user_name } = req.body;
-console.log('SLACK POST:contactSfId:'+contactSfId);
-    try {
-console.log('Server-slack: Before post');
-
-        const response = await axios.post('https://slack.com/api/chat.postMessage', {
-            channel: SLACK_CHANNEL_ID,
-            // Format it nicely so your team knows it came from the mobile app
-            text: `📱 *New Message from ${user_name}:*\n${message_text}`
-        }, {
-            headers: {
-                'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-                'Content-Type': 'application/json; charset=utf-8'
-            }
-        });
-        console.log('After Insert to Slack:'+response.data.error);
-        if (!response.data.ok) {
-            throw new Error(response.data.error);
-        }
-
-        const SLACK_TS = response.data.ts; // 'ts' is Slack's unique timestamp ID
-
-        // =========================================================
-        // 💾 DATABASE LOGIC ONLY: SAVE OUTBOUND TO SLACK_MESSAGES
-        // =========================================================
-        const insertQuery = `
-            INSERT INTO slack_messages (contact_sf_id,conversation_id, sender_id, message_text, slack_ts, source, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, NOW());
-        `;
-        console.log('Server-slack: Before insert to Postgress:');
-       const dbResult = await db.query(insertQuery, [
-            contactSfId,
-            SLACK_CHANNEL_ID,       // conversation_id
-            user_name || 'Mobile',  // sender_id identity tracking
-            message_text,           // original message clean text
-            SLACK_TS,               // slack unique ts token
-            'Mobile_App'            // source tracking string
-        ]);
-        console.log(`Server-slack: 💾 Saved to slack_messages table. Row Entry ID: ${dbResult.rows[0].id}`);
-        console.log('Server-slack: After insert to Postgress:');
-
-        res.json({ success: true, ts: response.data.ts }); // 'ts' is Slack's timestamp ID
-    } catch (error) {
-        console.error('❌ Failed to push message to Slack:', error.message);
-        res.status(500).json({ error: 'Slack transmission failed' });
-    }
-});
-*/
-
 // 📱 Endpoint A: Mobile App starts a fresh conversation session
 app.post('/message', async (req, res) => {
-    const { contactSfId,message_text, user_name } = req.body;
+    const { contactSfId, message_text, user_name } = req.body;
     var DYNAMIC_CHANNEL_ID;
 
     try {
-
         const result = await db.query(
-            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`, 
+            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`,
             [contactSfId]
         );
 
         DYNAMIC_CHANNEL_ID = result.rows.length > 0 ? result.rows[0].conversation_id : null;
 
+        if (DYNAMIC_CHANNEL_ID == null) {
 
-      if(DYNAMIC_CHANNEL_ID == null){  
-        // =========================================================
-        // 🆕 STEP 1: DYNAMICALLY CREATE A NEW SLACK CHANNEL
-        // =========================================================
-        // Slack channel names must be lowercase, max 80 chars, alphanumeric/hyphens only
-        const cleanName = `chat-${(user_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
+            if (SLACK_USE_DM) {
+                // =========================================================
+                // 🆕 DM MODE: Open a direct message channel with the agent
+                // =========================================================
+                console.log('💬 SLACK_USE_DM is true — opening DM with agent instead of creating a channel.');
 
-        const createChannelResponse = await axios.post('https://slack.com/api/conversations.create', {
-            name: cleanName, 
-            is_private: false, // Change to true if you want private triage rooms
-            users:  `U0BA17L3N6T,${AGENTFORCE_BOT_ID}` //'U0BA17L3N6T'
-        }, {
-            headers: {
-                'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-                'Content-Type': 'application/json; charset=utf-8'
-            }
-        });
-        console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName'+cleanName);
-        if (!createChannelResponse.data.ok) {
-            throw new Error(`Slack Channel creation failed: ${createChannelResponse.data.error}`);
-        }
+                const openDmResponse = await axios.post('https://slack.com/api/conversations.open', {
+                    users: AGENTFORCE_BOT_ID
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${SLACK_USER_TOKEN}`,
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
 
-        // 🎯 This is the dynamic 'C0...' ID generated on the fly by Slack!
-        DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id; 
-        // =========================================================
-        // STEP 2: RUN THE INVITATION (This pulls you into the room)
-        // =========================================================
-        try {
-            await axios.post('https://slack.com/api/conversations.invite', {
-                channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
-                users: `U0BA17L3N6T,${AGENTFORCE_BOT_ID}` // 🎯 Put your exact User Member ID string here 'U0BA17L3N6T' 
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-                    'Content-Type': 'application/json; charset=utf-8'
+                if (!openDmResponse.data.ok) {
+                    throw new Error(`Slack DM open failed: ${openDmResponse.data.error}`);
                 }
-            });
-            console.log(`👥 Successfully pulled user into channel ${DYNAMIC_CHANNEL_ID}`);
-        } catch (inviteError) {
-            console.error('⚠️ Could not auto-invite user:', inviteError.response?.data?.error || inviteError.message);
+
+                DYNAMIC_CHANNEL_ID = openDmResponse.data.channel.id; // 'D...'
+                console.log(`✅ DM channel opened: ${DYNAMIC_CHANNEL_ID}`);
+
+            } else {
+                // =========================================================
+                // 🆕 CHANNEL MODE: Dynamically create a new Slack channel
+                // =========================================================
+                const cleanName = `chat-${(user_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
+
+                const createChannelResponse = await axios.post('https://slack.com/api/conversations.create', {
+                    name: cleanName,
+                    is_private: false,
+                    users: `U0BA17L3N6T,${AGENTFORCE_BOT_ID}`
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+                console.log('SLACK NEW CHANNEL POST:contactSfId:cleanName' + cleanName);
+                if (!createChannelResponse.data.ok) {
+                    throw new Error(`Slack Channel creation failed: ${createChannelResponse.data.error}`);
+                }
+
+                DYNAMIC_CHANNEL_ID = createChannelResponse.data.channel.id;
+
+                try {
+                    await axios.post('https://slack.com/api/conversations.invite', {
+                        channel: DYNAMIC_CHANNEL_ID,
+                        users: `U0BA17L3N6T,${AGENTFORCE_BOT_ID}`
+                    }, {
+                        headers: {
+                            'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+                            'Content-Type': 'application/json; charset=utf-8'
+                        }
+                    });
+                    console.log(`👥 Successfully pulled user and agent into channel ${DYNAMIC_CHANNEL_ID}`);
+                } catch (inviteError) {
+                    console.error('⚠️ Could not auto-invite user/agent:', inviteError.response?.data?.error || inviteError.message);
+                }
+            }
         }
+
         // =========================================================
-        // STEP 3: POST THE INTERACTION TO THE NEWLY CREATED ROOM
+        // POST THE MESSAGE — token and @mention differ by mode
         // =========================================================
-    }
-       
+        const postToken = SLACK_USE_DM ? SLACK_USER_TOKEN : SLACK_USER_TOKEN; // both modes need the user token to reach the agent
+        const messageText = SLACK_USE_DM
+            ? message_text // no @mention needed in a DM
+            : `<@${AGENTFORCE_BOT_ID}> 📱 *New Support Session Started by ${user_name}:*\n${message_text}`;
+
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
-            channel: DYNAMIC_CHANNEL_ID, // ⚡ Sent to the new channel
-           // text: `📱 *New Support Session Started by ${user_name}:*\n${message_text}`
-            text: `📱 *New Support Session Started by ${user_name}:*\n<@${AGENTFORCE_BOT_ID}> ${message_text}`
+            channel: DYNAMIC_CHANNEL_ID,
+            text: messageText
         }, {
             headers: {
-             //   'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-                'Authorization': `Bearer ${SLACK_USER_TOKEN}`,             
+                'Authorization': `Bearer ${postToken}`,
                 'Content-Type': 'application/json; charset=utf-8'
             }
         });
@@ -167,33 +138,29 @@ app.post('/message', async (req, res) => {
             throw new Error(response.data.error);
         }
 
-        const SLACK_TS = response.data.ts; 
-        console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS'+SLACK_TS);
-        // =========================================================
-        // STEP 3: LOG THE DYNAMIC ID INTO POSTGRES
-        // =========================================================
+        const SLACK_TS = response.data.ts;
+        console.log('SLACK NEW CHANNEL POST:contactSfId:SLACK_TS' + SLACK_TS);
+
         const insertQuery = `
             INSERT INTO slack_messages (contact_sf_id,conversation_id, sender_id, message_text, slack_ts, source, created_at)
             VALUES ($1, $2, $3, $4, $5,$6, NOW());
         `;
-        
+
         await db.query(insertQuery, [
             contactSfId,
-            DYNAMIC_CHANNEL_ID, // Saved dynamically now! (Ensure column type is altered to VARCHAR)
-            user_name || 'Mobile',  
-            message_text,           
-            SLACK_TS,               
-            'Mobile_App'            
+            DYNAMIC_CHANNEL_ID,
+            user_name || 'Mobile',
+            message_text,
+            SLACK_TS,
+            'Mobile_App'
         ]);
 
-        // Return the dynamic target ID back to the mobile client 
-        res.json({ success: true, conversation_id: DYNAMIC_CHANNEL_ID, ts: SLACK_TS }); 
+        res.json({ success: true, conversation_id: DYNAMIC_CHANNEL_ID, ts: SLACK_TS, mode: SLACK_USE_DM ? 'dm' : 'channel' });
 
     } catch (error) {
         console.error('❌ Failed to process dynamic pipeline step:', error.message);
         res.status(500).json({ error: 'Internal failure processing session creation', details: error.message });
     }
-    
 });
 
 app.listen(3019, () => console.log('[SLACK] 💬 Slack Channel Service live on 3019'));
