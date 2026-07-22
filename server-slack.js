@@ -63,7 +63,8 @@ app.post('/message', async (req, res) => {
                 console.log('💬 SLACK_USE_DM is true — opening DM with agent instead of creating a channel.');
 
                 const openDmResponse = await axios.post('https://slack.com/api/conversations.open', {
-                    users: AGENTFORCE_BOT_ID
+                  //  users: AGENTFORCE_BOT_ID
+                  users: `${AGENTFORCE_BOT_ID},${MY_OWN_BOT_ID}` // changed: now includes your own bot too, creating a group DM
                 }, {
                     headers: {
                         'Authorization': `Bearer ${SLACK_USER_TOKEN}`,
