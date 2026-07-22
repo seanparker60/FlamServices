@@ -46,11 +46,13 @@ app.post('/message', async (req, res) => {
 
     try {
         const result = await db.query(
-            `SELECT id, message_text,conversation_id, source, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`,
+            `SELECT id, message_text, conversation_id, source, slack_ts, TO_CHAR(created_at, 'HH12:MI AM') as time FROM slack_messages WHERE contact_sf_id = $1 ORDER BY created_at ASC`,
             [contactSfId]
         );
 
-        DYNAMIC_CHANNEL_ID = result.rows.length > 0 ? result.rows[0].conversation_id : null;
+        const isNewSession = result.rows.length === 0;
+        DYNAMIC_CHANNEL_ID = !isNewSession ? result.rows[0].conversation_id : null;
+        const rootThreadTs = !isNewSession ? result.rows[0].slack_ts : null; // first message's ts becomes the thread root
 
         if (DYNAMIC_CHANNEL_ID == null) {
 
@@ -117,16 +119,19 @@ app.post('/message', async (req, res) => {
         }
 
         // =========================================================
-        // POST THE MESSAGE — token and @mention differ by mode
+        // POST THE MESSAGE — text, token, and threading differ by mode/session state
         // =========================================================
-        const postToken = SLACK_USE_DM ? SLACK_USER_TOKEN : SLACK_USER_TOKEN; // both modes need the user token to reach the agent
+        const postToken = SLACK_USER_TOKEN;
         const messageText = SLACK_USE_DM
-            ? message_text // no @mention needed in a DM
-            : `<@${AGENTFORCE_BOT_ID}> 📱 *New Support Session Started by ${user_name}:*\n${message_text}`;
+            ? message_text
+            : isNewSession
+                ? `<@${AGENTFORCE_BOT_ID}> 📱 *New Support Session Started by ${user_name}:*\n${message_text}`
+                : `<@${AGENTFORCE_BOT_ID}> ${message_text}`;
 
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: DYNAMIC_CHANNEL_ID,
-            text: messageText
+            text: messageText,
+            ...(rootThreadTs && { thread_ts: rootThreadTs }) // present only on follow-ups; threads under the first message
         }, {
             headers: {
                 'Authorization': `Bearer ${postToken}`,
@@ -162,5 +167,6 @@ app.post('/message', async (req, res) => {
         res.status(500).json({ error: 'Internal failure processing session creation', details: error.message });
     }
 });
+
 
 app.listen(3019, () => console.log('[SLACK] 💬 Slack Channel Service live on 3019'));
