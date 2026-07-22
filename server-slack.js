@@ -7,6 +7,7 @@ app.use(express.json());
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN; 
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID; // The target channel (e.g., #customer-support)
+const AGENTFORCE_BOT_ID = process.env.AGENTFORCE_BOT_ID || 'U0BJKS8T267';
 
 const db = new Pool(
     process.env.DATABASE_URL ? {
@@ -113,7 +114,7 @@ app.post('/message', async (req, res) => {
         const createChannelResponse = await axios.post('https://slack.com/api/conversations.create', {
             name: cleanName, 
             is_private: false, // Change to true if you want private triage rooms
-            users: 'U0BA17L3N6T'
+            users:  `U0BA17L3N6T,${AGENTFORCE_BOT_ID}` //'U0BA17L3N6T'
         }, {
             headers: {
                 'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
@@ -133,7 +134,7 @@ app.post('/message', async (req, res) => {
         try {
             await axios.post('https://slack.com/api/conversations.invite', {
                 channel: DYNAMIC_CHANNEL_ID, // Target the room we just built above
-                users: 'U0BA17L3N6T'           // 🎯 Put your exact User Member ID string here
+                users: `U0BA17L3N6T,${AGENTFORCE_BOT_ID}` // 🎯 Put your exact User Member ID string here 'U0BA17L3N6T' 
             }, {
                 headers: {
                     'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
@@ -151,7 +152,8 @@ app.post('/message', async (req, res) => {
        
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: DYNAMIC_CHANNEL_ID, // ⚡ Sent to the new channel
-            text: `📱 *New Support Session Started by ${user_name}:*\n${message_text}`
+           // text: `📱 *New Support Session Started by ${user_name}:*\n${message_text}`
+            text: `📱 *New Support Session Started by ${user_name}:*\n<@${AGENTFORCE_BOT_ID}> ${message_text}`
         }, {
             headers: {
                 'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
