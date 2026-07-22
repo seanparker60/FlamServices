@@ -157,8 +157,8 @@ app.post('/message', async (req, res) => {
             text: `📱 *New Support Session Started by ${user_name}:*\n<@${AGENTFORCE_BOT_ID}> ${message_text}`
         }, {
             headers: {
-              //  'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
-                'Authorization': `Bearer ${SLACK_USER_TOKEN}`,             
+                'Authorization': `Bearer ${SLACK_BOT_TOKEN}`,
+             //   'Authorization': `Bearer ${SLACK_USER_TOKEN}`,             
                 'Content-Type': 'application/json; charset=utf-8'
             }
         });
