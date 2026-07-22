@@ -69,17 +69,18 @@ app.post('/slack-listener', async (req, res) => {
 
     const { event } = req.body || {};
     console.log('[SLACK LISTENR: event.text:]***', event.text);
+     console.log('[SLACK LISTENR: event.message.text :]***', event.message.text);
     console.log('[SLACK LISTENR: event.type:]***', event.type);
     console.log('[SLACK LISTENR: event.bot_id:]***', event.bot_id);
   //  console.log('[SLACK LISTENER] FULL EVENT:', JSON.stringify(event, null, 2));
 
     const label = 'SLACK_EVENT';
     const lines = JSON.stringify(event, null, 2).split('\n');
-    
+    /*
     console.log(`--- ${label} (${lines.length} lines) ---`);
         lines.forEach((line, i) => console.log(`[${label} ${i}] ${line}`));
     console.log(`--- END ${label} ---`);
-
+    */
     // Ignore bot messages, message edits, or system join events
     if (!event || event.bot_id || event.type !== 'message' || event.subtype) {
         return;
