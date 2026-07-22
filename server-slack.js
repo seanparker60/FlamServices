@@ -10,6 +10,7 @@ const SLACK_USER_TOKEN = process.env.SLACK_USER_TOKEN; // your admin user's toke
 const SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID;
 const AGENTFORCE_BOT_ID = process.env.AGENTFORCE_BOT_ID; // 'U0BJKS8T267'
 const SLACK_USE_DM = process.env.SLACK_USE_DM; // boolean flag from env process.env.SLACK_USE_DM === 'true';
+const MY_OWN_BOT_ID = process.env.MY_OWN_BOT_ID;
 
 const db = new Pool(
     process.env.DATABASE_URL ? {
