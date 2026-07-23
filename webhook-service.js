@@ -166,8 +166,8 @@ app.post('/agent-response', async (req, res) => {
         return res.status(401).json({ error: 'Invalid API key' });
     }
     */
-    const { contactSfId, message_text, source } = req.body;
-    console.log(`📥 Direct agent response for contact ${contactSfId}: ${message_text}`);
+    const { contactSfId, message_text,conversation_id, source } = req.body;
+    console.log(`📥 Direct agent response for Conversation ${conversation_id}: contact ${contactSfId}: ${message_text}`);
 
     try {
         const insertQuery = `
@@ -177,7 +177,7 @@ app.post('/agent-response', async (req, res) => {
         `;
         const dbResult = await db.query(insertQuery, [
             contactSfId,
-            null, // no Slack conversation_id needed for this path
+            conversation_id, 
             'Agentforce',
             message_text,
             null,
@@ -188,6 +188,7 @@ app.post('/agent-response', async (req, res) => {
             room: contactSfId, // if your mobile app's websocket room is keyed by contactSfId elsewhere, adjust to match
             event_name: 'new_agent_comment',
             payload: {
+                conversation_id: conversation_id,
                 contact_sf_id: contactSfId,
                 message_text,
                 source: source || 'Slack_Web',
