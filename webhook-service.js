@@ -158,5 +158,50 @@ app.post('/slack-listener', async (req, res) => {
     res.sendStatus(200);
 });
 
+app.post('/agent-response', async (req, res) => {
+    
+    /*
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey !== process.env.AGENT_WEBHOOK_API_KEY) {
+        return res.status(401).json({ error: 'Invalid API key' });
+    }
+    */
+    const { contactSfId, message_text, source } = req.body;
+    console.log(`📥 Direct agent response for contact ${contactSfId}: ${message_text}`);
+
+    try {
+        const insertQuery = `
+            INSERT INTO slack_messages (contact_sf_id, conversation_id, sender_id, message_text, slack_ts, source, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, NOW())
+            RETURNING id;
+        `;
+        const dbResult = await db.query(insertQuery, [
+            contactSfId,
+            null, // no Slack conversation_id needed for this path
+            'Agentforce',
+            message_text,
+            null,
+            source || 'Slack_Web'
+        ]);
+
+        await axios.post('http://localhost:3020/api/internal-broadcast', {
+            room: contactSfId, // if your mobile app's websocket room is keyed by contactSfId elsewhere, adjust to match
+            event_name: 'new_agent_comment',
+            payload: {
+                contact_sf_id: contactSfId,
+                message_text,
+                source: source || 'Slack_Web',
+                created_at: new Date()
+            }
+        });
+
+        console.log(`💾 Saved direct agent response. Row ID: ${dbResult.rows[0].id}`);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('🚨 Failed to process direct agent response:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 app.listen(3006, () => console.log('🔗 Webhook Listener on :3006'));

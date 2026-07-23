@@ -64,8 +64,8 @@ app.post('/message', async (req, res) => {
                 console.log('💬 SLACK_USE_DM is true — opening DM with agent instead of creating a channel.');
 
                 const openDmResponse = await axios.post('https://slack.com/api/conversations.open', {
-                  //  users: AGENTFORCE_BOT_ID
-                  users: `${AGENTFORCE_BOT_ID},${MY_OWN_BOT_ID}` // changed: now includes your own bot too, creating a group DM
+                  users: AGENTFORCE_BOT_ID
+                 //REMOVED BACK TO 1:1 DM users: `${AGENTFORCE_BOT_ID},${MY_OWN_BOT_ID}` // changed: now includes your own bot too, creating a group DM
                 }, {
                     headers: {
                         'Authorization': `Bearer ${SLACK_USER_TOKEN}`,
@@ -124,11 +124,14 @@ app.post('/message', async (req, res) => {
         // POST THE MESSAGE — text, token, and threading differ by mode/session state
         // =========================================================
         const postToken = SLACK_USER_TOKEN;
+        /*
         const messageText = SLACK_USE_DM
             ? message_text
             : isNewSession
                 ? `<@${AGENTFORCE_BOT_ID}> 📱 *New Support Session Started by ${user_name}:*\n${message_text}`
                 : `<@${AGENTFORCE_BOT_ID}> ${message_text}`;
+        */
+        const messageText = `\`ref:${contactSfId}\` \`channel:${DYNAMIC_CHANNEL_ID}\` ${message_text}`;
 
         const response = await axios.post('https://slack.com/api/chat.postMessage', {
             channel: DYNAMIC_CHANNEL_ID,
