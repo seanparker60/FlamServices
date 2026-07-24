@@ -185,7 +185,7 @@ app.post('/agent-response', async (req, res) => {
         ]);
 
         await axios.post('http://localhost:3020/api/internal-broadcast', {
-            room: contactSfId, // if your mobile app's websocket room is keyed by contactSfId elsewhere, adjust to match
+            room: conversation_id, // contactSfId, // if your mobile app's websocket room is keyed by contactSfId elsewhere, adjust to match
             event_name: 'new_agent_comment',
             payload: {
                 conversation_id: conversation_id,
