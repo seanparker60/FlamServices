@@ -40,8 +40,23 @@ const db = new Pool(
     }
 );
 
-const activeTrackers = new Map(); 
+const activeTrackers = new Map();
 const lastProcessedIdMap = new Map();
+
+// Connect API returns rich-text messageText with HTML entities (e.g. &#39;) still encoded
+function decodeHtmlEntities(text) {
+    if (!text) return text;
+    const namedEntities = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+    return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity) => {
+        if (entity[0] === '#') {
+            const code = entity[1] === 'x' || entity[1] === 'X'
+                ? parseInt(entity.slice(2), 16)
+                : parseInt(entity.slice(1), 10);
+            return String.fromCodePoint(code);
+        }
+        return namedEntities[entity] ?? match;
+    });
+}
 
 app.use(express.json());
 
@@ -136,6 +151,7 @@ async function pollEnhancedConnectAPI(conversationIdentifier) {
         var newEntry;// = entries[index];
         while (index < entries.length) {
         const currentEntry = entries[index];
+        currentEntry.messageText = decodeHtmlEntities(currentEntry.messageText);
         console.log(`ENTRIES Message:`, entries[index].messageText);
         console.log(`ENTRIES index:`, index); 
         // 4. Only insert if the conversation ID is NOT in our existing list
