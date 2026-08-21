@@ -83,7 +83,7 @@ app.use('/orders', authenticate, createProxyMiddleware({
 app.use('/products', authenticate, createProxyMiddleware({ ...proxyOptions, target: 'http://localhost:3003' }));
 
 
-app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true, pathRewrite: { '^/dashboard': '' } }));
+app.use('/dashboard', createProxyMiddleware({ target: 'http://localhost:3005', changeOrigin: true }));
 /*
 app.post('/webhooks/slack', (req, res) => {
     console.log("📥 GATEWAY DIRECT HIT! Body received:", req.body);
