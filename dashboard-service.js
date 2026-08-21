@@ -33,7 +33,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 
-app.use(express.static(path.join(__dirname, 'Public')));
+app.use(express.static(path.join(__dirname, 'Public'), { index: false }));
 
 // Configuration map for all your microservices
 const servicesConfig = {
