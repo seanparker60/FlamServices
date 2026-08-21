@@ -52,7 +52,7 @@ const servicesConfig = {
 
 // Main layout endpoint (Loads your new carousel)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'carousel.html'));
+    res.sendFile(path.join(__dirname, 'Public', 'carousel.html'));
 });
 
 // --- OLD FEATURE KEPT: API to get current database statistics ---
