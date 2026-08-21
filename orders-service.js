@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static('public')); // We will put the HTML here
 
 const GATEWAY_URL = 'http://localhost:3000';
-const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4iLCJpYXQiOjE3NzgzNDE0NTgsImV4cCI6MTc3ODM0NTA1OH0.fyRY8A6-kuT50UbwenXx7xDWE_adaOqJlRElWHOFjs4'; // Must be a valid token for the Gateway
+const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4iLCJpYXQiOjE3ODczMTY4NTIsImV4cCI6MTc4NzMyMDQ1Mn0.INUKzxEdMbSgo3xWV9iwLabDJ3vZFmxDRblQtSTN0DQ'; // Must be a valid token for the Gateway
 
 // 1. Get Data for the Form
 app.get('/setup-data', async (req, res) => {
