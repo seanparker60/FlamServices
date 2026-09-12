@@ -15,6 +15,7 @@ const db = mysql.createPool({
 });
 
 // 2. Email Transporter (Using Gmail as an example - use your SMTP)
+/*
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -22,6 +23,16 @@ const transporter = nodemailer.createTransport({
         pass: 'kuxf wsgj bmfv jrlj' // Not your login password, a Gmail App Password
     }
 });
+*/
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.Case_Email_User,
+        pass: process.env.Case_Email_Code // Not your login password, a Gmail App Password
+    }
+});
+
+
 
 app.post('/', async (req, res) => {
     console.log('--- 📁 Case Service: POST Received ---');
