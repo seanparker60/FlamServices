@@ -26,11 +26,16 @@ const transporter = nodemailer.createTransport({
 });
 */
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // STARTTLS instead of implicit TLS on 465
+    family: 4, // force IPv4, skips any flaky IPv6 path
     auth: {
         user: process.env.Case_Email_User,
         pass: process.env.Case_Email_Code // Not your login password, a Gmail App Password
-    }
+    },
+    logger: true, // prints each SMTP step to the console
+    debug: true // shows the raw protocol exchange
 });
 
 
