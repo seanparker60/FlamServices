@@ -39,13 +39,14 @@ app.post('/', async (req, res) => {
     const { contactSfId, subject, description, email } = req.body;
     
     // REPLACE THIS with your actual Salesforce Email-to-Case address
-    const SF_CASE_EMAIL = 'seanparker60@y-1bd2c77bc7q0nvspkda5qnff3dz2zvggl1cpyx6pd8uy2ag7e3.g-cmjfma0.na225.case.salesforce.com';
+ //   const SF_CASE_EMAIL = 'seanparker60@y-1bd2c77bc7q0nvspkda5qnff3dz2zvggl1cpyx6pd8uy2ag7e3.g-cmjfma0.na225.case.salesforce.com';
 
+ const SF_CASE_EMAIL = process.env.Case_EmailtoCase;
     try {
         console.log('📧 Sending Email to Salesforce Email-to-Case...');
         
         const mailOptions = {
-            from: 'seanparker60@gmail.com',
+            from: process.env.Case_Email_User,
             to: SF_CASE_EMAIL,
             subject: subject,
             text: `ContactID: ${contactSfId}\nOrigin: Web\nStatus: New\n\nDescription:\n${description}`,
