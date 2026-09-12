@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
@@ -44,7 +45,9 @@ app.post('/', async (req, res) => {
  const SF_CASE_EMAIL = process.env.Case_EmailtoCase;
     try {
         console.log('📧 Sending Email to Salesforce Email-to-Case...');
-        
+        console.log('🗄️ Case Case_Email_User...'+process.env.Case_Email_User);
+        console.log('🗄️ Case Case_Email_Code...'+process.env.Case_Email_Code);
+        console.log('🗄️ Case SF_CASE_EMAILL...'+SF_CASE_EMAIL);
         const mailOptions = {
             from: process.env.Case_Email_User,
             to: SF_CASE_EMAIL,
